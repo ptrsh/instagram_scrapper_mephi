@@ -20,10 +20,16 @@ class Selenium:
 
         driver.get(url)
         driver.maximize_window()
-        driver.implicitly_wait(5)
+        driver.implicitly_wait(10)
 
+        cookie_permission = driver.find_elements(By.XPATH, '/html/body/div[4]/div/div/button[1]')
+        if len(cookie_permission)>0:
+            cookie_permission[0].click()
+        driver.implicitly_wait(20)
+        
         driver.find_element(By.NAME, 'username').send_keys(login)
         driver.find_element(By.NAME, 'password').send_keys(password)
+        driver.implicitly_wait(10)
         driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[3]/button').click()
         driver.implicitly_wait(10)
 
@@ -33,6 +39,7 @@ class Selenium:
 
 
         print("logged in successfully")
+        
 
     def refresh_page(self):
         """Пример базовой функции"""
@@ -66,6 +73,15 @@ class Bot:
     def follow(self):
         self.selenium.refresh_page()
         print('[+] follow')
+    
+    def like(self, post_url):
+        driver = self.selenium.driver
+        driver.get(post_url)
+        driver.implicitly_wait(5)
+
+        driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/div[1]/article/div/div[2]/div/div[2]/section[1]/span[1]/button").click()
+
+        pass
 
 
 class Controller:
@@ -82,18 +98,31 @@ class Controller:
 
     def follow(self):
         self.bot.follow()
+    
+    def like(self, post_url):
+        self.bot.like(post_url)
 
 def main():
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--allow-profiles-outside-user-dir')
+    options.add_argument('--enable-profile-shortcut-manager')
+    options.add_argument(r'user-data-dir=.\User')
+    options.add_argument('--profile-directory=Profile 1')
+
+
     load_dotenv()
 
     insta_tool = Controller()
 
     login = os.environ.get('LOGIN')
     password = os.environ.get('PASSWORD')
-    print(login, password)
-    insta_tool.login(login, password)
-
     target_url = os.environ.get('TARGET_URL')
+    post_url = os.environ.get('POST_URL')
+
+    insta_tool.login(login, password)
+    insta_tool.like(post_url)
+
     #insta_tool.scrape_followers(target_url)
 
 
