@@ -9,7 +9,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from dotenv import load_dotenv
 
-DELAY = 10
+DELAY = 60
 class Selenium:
     """Класс для реализации базовых функций"""
     def __init__(self):
@@ -21,21 +21,16 @@ class Selenium:
 
         driver.get(url)
         driver.maximize_window()
-        driver.implicitly_wait(DELAY*2)
 
         cookie_permission = driver.find_elements(By.XPATH, '/html/body/div[4]/div/div/button[1]')
         if len(cookie_permission)>0:
             cookie_permission[0].click()
-        driver.implicitly_wait(DELAY*3)
         
         driver.find_element(By.NAME, 'username').send_keys(login)
         driver.find_element(By.NAME, 'password').send_keys(password)
-        driver.implicitly_wait(DELAY*3)
         driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[3]/button').click()
-        driver.implicitly_wait(DELAY)
 
         driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/div/div/div/button").click()
-        driver.implicitly_wait(DELAY*2)
         driver.find_element(By.XPATH, "/html/body/div[5]/div/div/div/div[3]/button[2]").click()
 
 
@@ -55,7 +50,6 @@ class Scrapper:
     def scrape_followers(self, target_url):
         driver = self.selenium.driver
         driver.get(target_url)
-        driver.implicitly_wait(DELAY)
 
         followers = int(driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/header/section/ul/li[2]/a/div/span").text) 
         driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/header/section/ul/li[2]/a/div/span").click()
@@ -74,18 +68,15 @@ class Bot:
     def follow(self, follow_url):
         driver = self.selenium.driver
         driver.get(follow_url)
-        driver.implicitly_wait(DELAY)
         try:
             driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/header/section/div[1]/div[2]/div/div/div/span/span[1]/button/div").click()
         except NoSuchElementException:
-            //*[@id="react-root"]/section/main/div/header/section/div[1]/div[2]/div/div[2]/div/span/span[1]/button
             print("You have already follow him(her)")        
 
 
     def like(self, post_url):
         driver = self.selenium.driver
         driver.get(post_url)
-        driver.implicitly_wait(DELAY)
 
         driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/div[1]/article/div/div[2]/div/div[2]/section[1]/span[1]/button").click()
 
@@ -120,6 +111,7 @@ def main():
     load_dotenv()
 
     insta_tool = Controller()
+    insta_tool.selenium.driver.implicitly_wait(DELAY)
 
     login = os.environ.get('LOGIN')
     password = os.environ.get('PASSWORD')
