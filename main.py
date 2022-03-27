@@ -1,46 +1,61 @@
-import os
+import sys
 import time
 
 from selenium import webdriver
+import selenium
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException, MoveTargetOutOfBoundsException
 from webdriver_manager.chrome import ChromeDriverManager
+from random import randint
 
-from dotenv import load_dotenv
-
-DELAY = 60
 class Selenium:
     """Класс для реализации базовых функций"""
     def __init__(self):
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
+    def click_if_exist(self, element, timeout = 3, error_message = ''):
+        try: 
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((By.XPATH, element)))
+            self.driver.find_element(By.XPATH, element).click()
+        except TimeoutException:
+            if len(error_message) < 1:
+                return False
+            print(error_message)
+
+    def imitate_user_actions(self):
+        action = ActionChains(self.driver)
+        offsets = [randint(100,700) for _ in range(10)]
+        try:
+            action.scroll(offsets[0], offsets[1], offsets[2], offsets[3]).perform()
+            time.sleep(0.5)
+            action.scroll(offsets[4], offsets[5], offsets[6], offsets[7]).perform()
+            action.move_by_offset(offsets[8], offsets[9])
+        except MoveTargetOutOfBoundsException:
+            pass
+
     def login(self, login, password):
         driver = self.driver
-        url = 'https://www.instagram.com'
-
-        driver.get(url)
+        driver.get('https://www.instagram.com')
         driver.maximize_window()
-
-        cookie_permission = driver.find_elements(By.XPATH, '/html/body/div[4]/div/div/button[1]')
-        if len(cookie_permission)>0:
-            cookie_permission[0].click()
-        
+        time.sleep(1.5)
+        self.imitate_user_actions()
         driver.find_element(By.NAME, 'username').send_keys(login)
         driver.find_element(By.NAME, 'password').send_keys(password)
         driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[3]/button').click()
+        
+        cookie_permission = '/html/body/div[4]/div/div/button[1]'
+        self.click_if_exist(cookie_permission)
 
         driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/div/div/div/button").click()
-        driver.find_element(By.XPATH, "/html/body/div[5]/div/div/div/div[3]/button[2]").click()
+    
+        enable_notifications = '/html/body/div[6]/div/div/div/div[3]/button[1]'
+        self.click_if_exist(enable_notifications)
 
-
-        print("logged in successfully")
-        
-
-    def refresh_page(self):
-        """Пример базовой функции"""
-        print(f'{self.driver} делает refresh_page')
-
+        print('logged in succesfully')
 
 class Scrapper:
     """Класс для реализации функций парсера"""
@@ -56,7 +71,6 @@ class Scrapper:
 
         list_of_followers = 0
         
-        self.selenium.refresh_page()
         print('[+] scrape_followers')
 
 
@@ -68,10 +82,9 @@ class Bot:
     def follow(self, follow_url):
         driver = self.selenium.driver
         driver.get(follow_url)
-        try:
-            driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/header/section/div[1]/div[2]/div/div/div/span/span[1]/button/div").click()
-        except NoSuchElementException:
-            print("You have already follow him(her)")        
+       
+        follow_button ="/html/body/div[1]/section/main/div/header/section/div[1]/div[1]/div/div/div/span/span[1]/button"
+        self.selenium.click_if_exist(follow_button)        
 
 
     def like(self, post_url):
@@ -100,34 +113,17 @@ class Controller:
         self.bot.like(post_url)
 
 def main():
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('--allow-profiles-outside-user-dir')
-    options.add_argument('--enable-profile-shortcut-manager')
-    options.add_argument(r'user-data-dir=.\User')
-    options.add_argument('--profile-directory=Profile 1')
-
-
-    load_dotenv()
-
     insta_tool = Controller()
-    insta_tool.selenium.driver.implicitly_wait(DELAY)
+    insta_tool.selenium.driver.implicitly_wait(10)
 
-    login = os.environ.get('LOGIN')
-    password = os.environ.get('PASSWORD')
-    target_url = os.environ.get('TARGET_URL')
-    post_url = os.environ.get('POST_URL')
-    follow_url = target_url
-
+    login = sys.argv[1]
+    password = sys.argv[2]
     insta_tool.login(login, password)
+
     #insta_tool.like(post_url)
-    insta_tool.follow(follow_url)
-
+    #insta_tool.follow(follow_url)
     #insta_tool.scrape_followers(target_url)
-
-
     time.sleep(1000)
-    #insta_tool.follow()
 
 
 if __name__ == '__main__':
