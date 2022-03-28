@@ -9,3 +9,8 @@
     ```bash
     pip install -r requirements.txt
     ``` 
+
+3. Usage:
+	```bash
+	python3 main.py username password
+	```
