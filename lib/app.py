@@ -20,10 +20,10 @@ class Application:
         self.controller.follow()
 
     def func_3(self):
-        self.controller.like()
+        self.controller.get_posts()
 
     def func_4(self):
-        self.controller.get_posts()
+        self.controller.like()
 
     def func_5(self):
         self.controller.write_message()

@@ -55,8 +55,19 @@ class Controller:
 
         f.close()
 
-    def get_posts(self):
-        pass
+    def get_posts(self):    
+        target_url = self.view.get_url("Введите ссылку на аккаунт")
+        posts = self.scrapper.get_posts(target_url)
+        '''
+        f = open("../data/followers.txt", "w")
+        with self.view.console.status("[bold green]Парсинг подписчиков в followers.txt...") as status:
+            for post in posts:
+                f.write(post)
+                self.view.console.print(f"[green] [+] пост {post.rstrip()} записан[/green]")
+
+        f.close()
+        '''
+        print(posts)
 
     def write_message(self):
         pass

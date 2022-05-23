@@ -90,8 +90,22 @@ class Scrapper:
             if len(list_of_followers) == count:
                 break
         return [f'https://www.instagram.com/{i.text}/\n' for i in list_of_followers]
-        
-
+    def get_posts(self, target_url):
+        driver = self.selenium.driver
+        driver.get(target_url)
+        count = int(driver.find_element(By.XPATH, "//*[@id=\"react-root\"]/section/main/div/header/section/ul/li[1]/div/span").text.replace(' ', '')) 
+        time.sleep(5)
+        scrolldown = 0
+        prev = 0
+        while True:
+            prev = scrolldown
+            time.sleep(3)
+            scrolldown = driver.execute_script("window.scrollTo(0, document.body.scrollHeight);var scrolldown=document.body.scrollHeight;return scrolldown;")
+            if prev == scrolldown:
+                break
+        urls = driver.find_elements(By.TAG_NAME, 'a')
+        urls = [i.get_attribute('href') for i in urls]
+        return list(filter(lambda x:'/p/' in x, urls))
 class Bot:
     "Класс для реализации функций бота"
     def __init__(self, selenium):
