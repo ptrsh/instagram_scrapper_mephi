@@ -2,9 +2,8 @@ from controller import Controller
 
 
 class Application:
-    
-    def __init__(self):
-        self.controller = Controller()
+    def __init__(self, mode):
+        self.controller = Controller(mode)
 
     def start(self):
         self.controller.login()
@@ -25,12 +24,6 @@ class Application:
     def func_4(self):
         self.controller.like()
 
-    def func_5(self):
-        self.controller.write_message()
-
-    def func_6(self):
+    @staticmethod
+    def func_5():
         exit(0)
-        
-
-
-
